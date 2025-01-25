@@ -85,7 +85,7 @@ export default function PaymentsTable() {
   }
 
   return (
-    <div className="w-full space-y-4 bg-background p-3">
+    <div className="w-full space-y-4 bg-background p-3 border-2 rounded-xl">
       <div className="space-y-1">
         <h1 className="text-2xl font-normal tracking-tight">Payments</h1>
         <p className="text-sm text-muted-foreground">
@@ -100,7 +100,7 @@ export default function PaymentsTable() {
           className="max-w-sm"
         />
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-[#1d1d1d]">
         <Table>
           <TableHeader>
             <TableRow>
@@ -128,33 +128,17 @@ export default function PaymentsTable() {
                 ₹{payment.amount.toFixed(2)}
                 </TableCell>
                 <TableCell>{payment.date}</TableCell>
-                {/* <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <Option className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View details</DropdownMenuItem>
-                      <DropdownMenuItem>View payment</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {selectedRows.length} of {filteredPayments.length} row(s) selected.
-        </p>
         <div className="space-x-2">
-          <Button variant="outline" size="sm">
+          <Button  className="bg-[#1d1d1d] text-gray-300" size="sm">
             Previous
           </Button>
-          <Button variant="outline" size="sm">
+          <Button  className="bg-[#1d1d1d] text-gray-300" size="sm">
             Next
           </Button>
         </div>

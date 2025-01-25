@@ -13,7 +13,7 @@ export type PageProps = {
 
 export default function Page({ params }: PageProps) {
   return (
-    <div className="p-6 w-full">
+    <div className="p-6 w-full flex flex-col gap-2">
       <MainInfo />
       <TasksTable />
     </div>

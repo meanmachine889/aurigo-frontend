@@ -53,12 +53,12 @@ const UpdatesComponent: React.FC = () => {
       </div>
       <div className="space-y-4">
         {filteredUpdates.map((update) => (
-          <Card key={update.id} className="">
+          <Card key={update.id} className="bg-[#1d1d1d]">
             <CardContent className="p-4">
-              <p className="text-sm text-zinc-400">{format(update.date, "MMMM d, yyyy")}</p>
+              <p className="text-lg text-zinc-400">{format(update.date, "MMMM d, yyyy")}</p>
               {update.photos.length > 0 && (
                 <div className="mt-4 space-y-2">
-                  <p className="text-xs font-medium text-zinc-500">Photos:</p>
+                  <p className="text-md font-medium text-zinc-500">Photos:</p>
                   <div className="grid grid-cols-2 gap-2 w-fit">
                     {update.photos.map((photo, index) => (
                       <div key={index} className="relative aspect-square overflow-hidden rounded-md w-[300px]">
@@ -73,7 +73,7 @@ const UpdatesComponent: React.FC = () => {
                   </div>
                 </div>
               )}
-              {update.note && <p className="mt-4 text-sm text-zinc-300">{update.note}</p>}
+              {update.note && <p className="mt-4 text-lg text-zinc-300">{update.note}</p>}
             </CardContent>
           </Card>
         ))}

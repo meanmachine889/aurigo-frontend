@@ -84,7 +84,7 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
   };
 
   return (
-    <div className="w-full space-y-4 bg-background">
+    <div className="w-full space-y-4 bg-background ">
       <div className="flex items-center justify-start gap-5">
         <Input
           placeholder="Filter upi id"
@@ -93,7 +93,7 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
           className="max-w-sm"
         />
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-[#1d1d1d]">
         <Table>
           <TableHeader>
             <TableRow>
@@ -112,9 +112,11 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
                 <TableCell>{payment.upi}</TableCell>
                 <TableCell className="">
                   ${(payment.amount * payment.quantity).toFixed(2)}
-                </TableCell>    
+                </TableCell>
                 <TableCell>
-                  <Button className="bg-zinc-800 text-green-500">Approve</Button>
+                  <Button variant={"outline"} className="bg-[#1d1d1d] border-2 text-green-700">
+                    Approve
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -123,10 +125,10 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
       </div>
       <div className="flex items-center justify-between">
         <div className="space-x-2">
-          <Button variant="outline" size="sm">
+          <Button className="bg-[#1d1d1d] text-gray-300" size="sm">
             Previous
           </Button>
-          <Button variant="outline" size="sm">
+          <Button className="bg-[#1d1d1d] text-gray-300" size="sm">
             Next
           </Button>
         </div>

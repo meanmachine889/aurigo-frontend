@@ -60,14 +60,14 @@ const payments: Payment[] = [
 
 export default function TasksTable() {
   return (
-    <div className="w-full space-y-4 bg-background p-3">
+    <div className="w-full space-y-4 bg-background p-3 border-2 rounded-xl">
       <div className="space-y-1">
         <h1 className="text-2xl font-normal tracking-tight">Tasks</h1>
         <p className="text-sm text-muted-foreground">
           Manage all the tasks in this area.
         </p>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-[#1d1d1d]">
         <Table>
           <TableHeader>
             <TableRow>
@@ -98,10 +98,10 @@ export default function TasksTable() {
       </div>
       <div className="flex items-center justify-between">
         <div className="space-x-2">
-          <Button variant="outline" size="sm">
+          <Button className="bg-[#1d1d1d] text-gray-300" size="sm">
             Previous
           </Button>
-          <Button variant="outline" size="sm">
+          <Button className="bg-[#1d1d1d] text-gray-300" size="sm">
             Next
           </Button>
         </div>

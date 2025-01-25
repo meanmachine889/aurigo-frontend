@@ -16,6 +16,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { DialogForm } from "./dialog-form"
 
 export function NavMain({
   items,
@@ -23,13 +24,14 @@ export function NavMain({
   items: {
     title: string
     icon?: LucideIcon
-    isActive?: boolean
+    isOpen?: boolean
     tasks?: {
       title: string
       url: string
     }[]
   }[]
 }) {
+
   return (
     <SidebarGroup className="p-0">
       <SidebarMenu>
@@ -37,7 +39,7 @@ export function NavMain({
           <Collapsible
             key={item.title}
             asChild
-            defaultOpen={true}
+            defaultOpen={item.isOpen}
             className="group/collapsible"
           >
             <SidebarMenuItem >
@@ -59,6 +61,7 @@ export function NavMain({
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}
+                  <DialogForm />
                 </SidebarMenuSub>
               </CollapsibleContent>
             </SidebarMenuItem>

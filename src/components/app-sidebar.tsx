@@ -38,6 +38,7 @@ const Areas = [
   {
     title: "Financials",
     icon: Wallet,
+    isOpen: true,
     tasks: [
       {
         title: "Kitchen",
@@ -59,6 +60,7 @@ const Areas = [
   {
     title: "Tasks",
     icon: SquareCheckBig,
+    isOpen: false,
     tasks: [
       {
         title: "Kitchen",
@@ -80,6 +82,7 @@ const Areas = [
   {
     title:"Updates",
     icon: Command,
+    isOpen: false,
     tasks: [
       {
         title: "Kitchen",
@@ -104,7 +107,7 @@ const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: "",
   },
   teams: [
     {

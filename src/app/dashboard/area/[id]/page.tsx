@@ -12,10 +12,10 @@ export type PageProps = {
 
 export default function Page({ params }: PageProps) {
   return (
-    <div className="p-6 w-full">
+    <div className="p-6 w-full flex flex-col gap-2">
       <MainInfo />
       <PaymentsTable />
-      <div className="">
+      <div className="border-2 rounded-xl">
         <div className="space-y-1 p-3">
           <h1 className="text-2xl font-normal tracking-tight">
             Transaction Requests
