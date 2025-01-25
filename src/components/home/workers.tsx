@@ -16,68 +16,64 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { TeamForm } from "../team-form";
+import { WorkerForm } from "../worker-form";
 
 const team = [
   {
     name: "Sofia Davis",
-    email: "m@example.com",
-    role: "Manager",
+    role: "Plumber",
     mobile: "1234567890",
+    upi: "sofia@upi",
   },
   {
     name: "Jackson Lee",
     email: "p@example.com",
-    role: "Customer",
+    role: "Carpenter",
     mobile: "1234567890",
+    upi: "sofia@upi",
   },
   {
     name: "Isabella Nguyen",
     email: "n@example.com",
-    role: "Customer",
+    role: "Electrician",
     mobile: "1234567890",
-  },
-  {
-    name: "Isabella Nguyen",
-    email: "n@example.com",
-    role: "Customer",
-    mobile: "1234567890",
+    upi: "sofia@upi",
   },
 ];
 
-export function Members() {
+export function Workers() {
   return (
-    <Card className="min-w-[500px] w-[100%] col-span-2">
+    <Card className="min-w-[500px] w-[100%] border-2">
       <CardHeader>
-        <div className="flex justify-between">
+        <div className="flex justify-between items-start">
           <div className="flex flex-col gap-3">
-            <CardTitle className="font-normal text-lg">Team Members</CardTitle>
-            <CardDescription>Team members in your project.</CardDescription>
+            <CardTitle className="font-normal text-lg">Workers</CardTitle>
+            <CardDescription>Workers in your project.</CardDescription>
           </div>
-          <TeamForm />
+          <WorkerForm />
         </div>
       </CardHeader>
       <CardContent className="overflow-x-auto">
-        <div className="rounded-xl border max-h-[210px] overflow-scroll scrollbar-hide bg-[#1d1d1d]">
+        <div className="rounded-xl border bg-[#1d1d1d] max-h-[200px] overflow-y-auto scrollbar-hide">
           <Table className="border-none">
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
-                <TableHead className="">Role</TableHead>
+                <TableHead>Work</TableHead>
+                <TableHead className="">UPI Id</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {team.map((member) => (
-                <TableRow key={member.email} className="">
+              {team.map((member, index) => (
+                <TableRow key={index} className="">
                   <TableCell className="p-3 flex gap-3 items-center">
-                    <Avatar name={member.email} variant="marble" size={30} />
+                    <Avatar name={member.name} variant="marble" size={30} />
                     {member.name}
                   </TableCell>
-                  <TableCell className="p-3 ">{member.email}</TableCell>
                   <TableCell className="p-3 ">{member.mobile}</TableCell>
                   <TableCell className="p-3 ">{member.role}</TableCell>
+                  <TableCell className="p-3 ">{member.upi}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

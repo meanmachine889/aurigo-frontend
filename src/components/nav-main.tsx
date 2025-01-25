@@ -16,7 +16,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
-import { DialogForm } from "./dialog-form"
 
 export function NavMain({
   items,
@@ -61,7 +60,6 @@ export function NavMain({
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}
-                  <DialogForm />
                 </SidebarMenuSub>
               </CollapsibleContent>
             </SidebarMenuItem>
