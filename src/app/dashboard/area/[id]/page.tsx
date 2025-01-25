@@ -29,7 +29,7 @@ export default function Page() {
     const fetchTasks = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/task/${projectId}/areas/${areaId}/tasks`,
+          `https://v0ck2c87-5000.inc1.devtunnels.ms/api/task/${projectId}/areas/${areaId}/tasks`,
           {
             method: "GET",
             headers: {

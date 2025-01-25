@@ -18,7 +18,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ amount, transactionId }) 
 
     try {
       // Step 1: Create Razorpay order from backend
-      const res = await fetch(`http://localhost:5000/api/payments/${transactionId}/order`, {
+      const res = await fetch(`https://v0ck2c87-5000.inc1.devtunnels.ms/api/payments/${transactionId}/order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +45,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ amount, transactionId }) 
 
           // Step 3: Verify payment with backend
           const verifyRes = await fetch(
-            `http://localhost:5000/api/payments/${transactionId}/verify`,
+            `https://v0ck2c87-5000.inc1.devtunnels.ms/api/payments/${transactionId}/verify`,
             {
               method: "POST",
               headers: {

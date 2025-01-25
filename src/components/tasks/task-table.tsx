@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
+import { TaskForm } from "../task-form";
 
 interface Task {
   id: string;
@@ -41,7 +42,7 @@ export default function TasksTable() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/task/${projectId}/areas/${areaId}/tasks?page=${page}&limit=5`,
+        `https://v0ck2c87-5000.inc1.devtunnels.ms/api/task/${projectId}/areas/${areaId}/tasks?page=${page}&limit=5`,
         {
           method: "GET",
           headers: {
@@ -91,8 +92,9 @@ export default function TasksTable() {
           onChange={(e) => setFilterValue(e.target.value)}
           className="max-w-sm"
         />
+        <TaskForm />
       </div>
-      <div className="rounded-md border">
+      {filteredTasks.length ? <><div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -142,7 +144,7 @@ export default function TasksTable() {
         <p className="text-sm text-muted-foreground">
           Showing {tasks.length} of {totalTasks} tasks.
         </p>
-      </div>
+      </div></> : <div className="text-center text-muted-foreground">No tasks found.</div>}
     </div>
   );
 }

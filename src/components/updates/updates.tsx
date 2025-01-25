@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { DatePicker } from "@/components/ui/date-picker"
 import Image from "next/image"
 import { format } from "date-fns"
+import { UpdateForm } from "../update-form"
 
 export interface Update {
   id: string
@@ -44,12 +45,13 @@ const UpdatesComponent: React.FC = () => {
 
   return (
     <div className=" bg-zinc-950 text-zinc-100 min-h-screen">
-      <div className="mb-6">
+      <div className="mb-6 flex w-[100%] justify-between items-center">
         <DatePicker
           selected={selectedDate}
           onSelect={setSelectedDate}
           highlightedDates={updates.map((update) => update.date)}
         />
+        <UpdateForm/>
       </div>
       <div className="space-y-4">
         {filteredUpdates.map((update) => (

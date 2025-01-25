@@ -30,7 +30,7 @@ export default function PaymentsTable() {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:5000/api/transaction/${projectId}/${areaId}/completed-transactions?page=${currentPage}&limit=${limit}`,
+        `https://v0ck2c87-5000.inc1.devtunnels.ms/api/transaction/${projectId}/${areaId}/completed-transactions?page=${currentPage}&limit=${limit}`,
         {
           method: "GET",
           headers: {

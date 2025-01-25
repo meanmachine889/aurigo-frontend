@@ -28,6 +28,8 @@ import { NavUser } from "./nav-user";
 import { NavMain } from "./nav-main";
 import { jwtDecode } from "jwt-decode";
 import { Button } from "./ui/button";
+import * as React from "react";
+import { ProjForm } from "./project-form";
 
 export const decodeToken = () => {
   try {
@@ -54,8 +56,15 @@ const items = [
 export function AppSidebar() {
   const router = useRouter();
   const [userData, setUserData] = useState({ name: "", email: "" });
-  const [teams, setTeams] = useState<{ name: string; logo: any; plan: string; id?: string }[]>([]);
-  const [activeTeam, setActiveTeam] = useState<{ name: string; logo: any; plan: string; id?: string } | null>(null);
+  const [teams, setTeams] = useState<
+    { name: string; logo: any; plan: string; id?: string }[]
+  >([]);
+  const [activeTeam, setActiveTeam] = useState<{
+    name: string;
+    logo: any;
+    plan: string;
+    id?: string;
+  } | null>(null);
   const [areas, setAreas] = useState<any[]>([]); // For dynamically generated areas
   const [loading, setLoading] = useState(true);
 
@@ -70,33 +79,42 @@ export function AppSidebar() {
 
     const fetchTeams = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/project/", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        });
+        const response = await fetch(
+          "https://v0ck2c87-5000.inc1.devtunnels.ms/api/project/",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
           const projects = Array.isArray(data) ? data : data.projects;
 
           if (!Array.isArray(projects)) {
-            throw new Error("Invalid data structure: expected an array of projects");
+            throw new Error(
+              "Invalid data structure: expected an array of projects"
+            );
           }
 
-          const formattedTeams = projects.map((project: any, index: number) => ({
-            name: project.name,
-            logo: [GalleryVerticalEnd, AudioWaveform, Command][index % 3],
-            plan: "",
-            id: project._id,
-          }));
+          const formattedTeams = projects.map(
+            (project: any, index: number) => ({
+              name: project.name,
+              logo: [GalleryVerticalEnd, AudioWaveform, Command][index % 3],
+              plan: "",
+              id: project._id,
+            })
+          );
 
           setTeams(formattedTeams);
 
           // Check for a saved active team in localStorage
           const savedTeamId = localStorage.getItem("activeTeamId");
-          const savedTeam = formattedTeams.find((team) => team.id === savedTeamId);
+          const savedTeam = formattedTeams.find(
+            (team) => team.id === savedTeamId
+          );
           setActiveTeam(savedTeam || formattedTeams[0]); // Default to the first team if no saved team
         } else {
           console.error("Failed to fetch teams");
@@ -115,12 +133,15 @@ export function AppSidebar() {
     if (activeTeam) {
       const fetchAreas = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/api/project/${activeTeam.id}`, {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-            },
-          });
+          const response = await fetch(
+            `https://v0ck2c87-5000.inc1.devtunnels.ms/api/project/${activeTeam.id}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+              },
+            }
+          );
 
           if (response.ok) {
             const projectData = await response.json();
@@ -129,29 +150,35 @@ export function AppSidebar() {
               {
                 title: "Financials",
                 icon: Wallet,
-                tasks: projectData.project.area.map((area: any, index: number) => ({
-                  title: area.name,
-                  url: `/dashboard/area/${activeTeam.id}-${area._id}`,
-                  icon: [Utensils, GalleryVerticalEnd, Home][index % 3],
-                })),
+                tasks: projectData.project.area.map(
+                  (area: any, index: number) => ({
+                    title: area.name,
+                    url: `/dashboard/area/${activeTeam.id}-${area._id}`,
+                    icon: [Utensils, GalleryVerticalEnd, Home][index % 3],
+                  })
+                ),
               },
               {
                 title: "Tasks",
                 icon: SquareCheckBig,
-                tasks: projectData.project.area.map((area: any, index: number) => ({
-                  title: area.name,
-                  url: `/dashboard/tasks/${activeTeam.id}-${area._id}`,
-                  icon: [Utensils, GalleryVerticalEnd, Home][index % 3],
-                })),
+                tasks: projectData.project.area.map(
+                  (area: any, index: number) => ({
+                    title: area.name,
+                    url: `/dashboard/tasks/${activeTeam.id}-${area._id}`,
+                    icon: [Utensils, GalleryVerticalEnd, Home][index % 3],
+                  })
+                ),
               },
               {
                 title: "Updates",
                 icon: Command,
-                tasks: projectData.project.area.map((area: any, index: number) => ({
-                  title: area.name,
-                  url: `/dashboard/updates/${activeTeam.id}-${area._id}`,
-                  icon: [Utensils, GalleryVerticalEnd, Home][index % 3],
-                })),
+                tasks: projectData.project.area.map(
+                  (area: any, index: number) => ({
+                    title: area.name,
+                    url: `/dashboard/updates/${activeTeam.id}-${area._id}`,
+                    icon: [Utensils, GalleryVerticalEnd, Home][index % 3],
+                  })
+                ),
               },
             ];
 
@@ -191,6 +218,7 @@ export function AppSidebar() {
             localStorage.setItem("activeTeamId", team.id || ""); // Persist active team
           }}
         />
+        <ProjForm />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -200,7 +228,13 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Button onClick={() => router.push(`${item.url}/${activeTeam!.id}`)} variant="ghost" className="w-fit">
+                    <Button
+                      onClick={() =>
+                        router.push(`${item.url}/${activeTeam!.id}`)
+                      }
+                      variant="ghost"
+                      className="w-fit"
+                    >
                       <item.icon />
                       <span>{item.title}</span>
                     </Button>

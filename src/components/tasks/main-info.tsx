@@ -32,7 +32,7 @@ export default function MainInfo() {
       try {
         // Fetch area name from the project API
         const projectResponse = await fetch(
-          `http://localhost:5000/api/project/${projectId}`,
+          `https://v0ck2c87-5000.inc1.devtunnels.ms/api/project/${projectId}`,
           {
             method: "GET",
             headers: {
@@ -59,7 +59,7 @@ export default function MainInfo() {
 
         // Fetch tasks for the area
         const tasksResponse = await fetch(
-          `http://localhost:5000/api/task/${projectId}/areas/${areaId}/tasks`,
+          `https://v0ck2c87-5000.inc1.devtunnels.ms/api/task/${projectId}/areas/${areaId}/tasks`,
           {
             method: "GET",
             headers: {

@@ -31,7 +31,7 @@ export default function MainInfo() {
 
       try {
         // Step 1: Fetch the project details
-        const projectResponse = await fetch(`http://localhost:5000/api/project/${projectId}`, {
+        const projectResponse = await fetch(`https://v0ck2c87-5000.inc1.devtunnels.ms/api/project/${projectId}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -57,7 +57,7 @@ export default function MainInfo() {
         const completedTransactions = await Promise.all(
           area.tasks.map(async (taskId: string) => {
             const taskResponse = await fetch(
-              `http://localhost:5000/api/transaction/${projectId}/${areaId}/completed-transactions`,
+              `https://v0ck2c87-5000.inc1.devtunnels.ms/api/transaction/${projectId}/${areaId}/completed-transactions`,
               {
                 method: "GET",
                 headers: {

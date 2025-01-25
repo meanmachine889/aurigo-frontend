@@ -32,7 +32,7 @@ export default function Login() {
       };
   
       // Send login request to the backend
-      const response = await fetch("http://localhost:5000/api/user/login", {
+      const response = await fetch("https://v0ck2c87-5000.inc1.devtunnels.ms/api/user/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export default function Login() {
       };
   
       // Send OTP verification request to the backend
-      const response = await fetch("http://localhost:5000/api/user/verifyotp", {
+      const response = await fetch("https://v0ck2c87-5000.inc1.devtunnels.ms/api/user/verifyotp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -104,7 +104,7 @@ export default function Login() {
       const payload = { email };
   
       // Send request to the backend to resend OTP
-      const response = await fetch("http://localhost:5000/api/user/sendotp", {
+      const response = await fetch("https://v0ck2c87-5000.inc1.devtunnels.ms/api/user/sendotp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

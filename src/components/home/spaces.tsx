@@ -30,7 +30,7 @@ export default function Spaces() {
 
       try {
         // Fetch project details from the backend
-        const response = await fetch(`http://localhost:5000/api/project/${projectId}`, {
+        const response = await fetch(`https://v0ck2c87-5000.inc1.devtunnels.ms/api/project/${projectId}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,

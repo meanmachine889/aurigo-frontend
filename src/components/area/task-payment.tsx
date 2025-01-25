@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PaymentButton from "../ui/paymentbutton";
+import { TranForm } from "../transaction-req-form";
 
 interface Payment {
   upiid: string;
@@ -39,7 +40,7 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:5000/api/transaction/${id}?page=${currentPage}&limit=${pageLimit}`,
+          `https://v0ck2c87-5000.inc1.devtunnels.ms/api/transaction/${id}?page=${currentPage}&limit=${pageLimit}`,
           {
             method: "GET",
             headers: {
@@ -86,10 +87,6 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
     return <div>Loading transactions...</div>;
   }
 
-  if (transactions.length === 0) {
-    return <div>No pending transactions found</div>;
-  }
-
   return (
     <div className="w-full space-y-4 bg-background ">
       <div className="flex items-center justify-start gap-5">
@@ -99,8 +96,9 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
           onChange={(e) => setFilterValue(e.target.value)}
           className="max-w-sm"
         />
+        <TranForm />
       </div>
-      <div className="rounded-md border bg-[#1d1d1d]">
+      {transactions.length ? <><div className="rounded-md border bg-[#1d1d1d]">
         <Table>
           <TableHeader>
             <TableRow>
@@ -151,7 +149,7 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
             Next
           </Button>
         </div>
-      </div>
+      </div></> : <p>No pending requests</p>}
     </div>
   );
 }
