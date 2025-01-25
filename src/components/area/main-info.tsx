@@ -14,56 +14,89 @@ export default function MainInfo() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Extract projectId and areaId from the URL path
-    const pathname = window.location.pathname; // Use `window.location` to access the full path
-    const segments = pathname.split("/"); // Split the path into segments
-    const lastSegment = segments[segments.length - 1]; // Get the last part of the path
-    const [projectId, areaId] = lastSegment.split("-"); // Extract projectId and areaId
-
-    console.log("Project ID:", projectId, "Area ID:", areaId);
-
-    if (!projectId || !areaId) {
-      console.error("Invalid URL: Missing projectId or areaId");
-      setLoading(false);
-      return;
-    }
-
     const fetchDetails = async () => {
+      // Extract projectId and areaId from the URL path
+      const pathname = window.location.pathname;
+      const segments = pathname.split("/");
+      const lastSegment = segments[segments.length - 1];
+      const [projectId, areaId] = lastSegment.split("-");
+
+      console.log("Project ID:", projectId, "Area ID:", areaId);
+
+      if (!projectId || !areaId) {
+        console.error("Invalid URL: Missing projectId or areaId");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await fetch(`http://localhost:5000/api/project/${projectId}`, {
+        // Step 1: Fetch the project details
+        const projectResponse = await fetch(`http://localhost:5000/api/project/${projectId}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         });
 
-        if (response.ok) {
-          const project = await response.json();
-          console.log("Fetched project details:", project.project);
-
-          const area = project.project.area.find((a: any) => a._id == areaId);
-
-          if (area) {
-            setAreaDetails({
-              name: area.name,
-              expenditure: area.expenditure || 0,
-              tasksCount: area.tasks.length || 0,
-            });
-          } else {
-            console.error("Area not found in the project");
-          }
-        } else {
+        if (!projectResponse.ok) {
           console.error("Failed to fetch project details");
+          setLoading(false);
+          return;
         }
+
+        const project = await projectResponse.json();
+        const area = project.project.area.find((a: any) => a._id === areaId);
+
+        if (!area) {
+          console.error("Area not found in the project");
+          setLoading(false);
+          return;
+        }
+
+        // Step 2: Fetch completed transactions for all tasks in the area
+        const completedTransactions = await Promise.all(
+          area.tasks.map(async (taskId: string) => {
+            const taskResponse = await fetch(
+              `http://localhost:5000/api/transaction/${projectId}/${areaId}/completed-transactions`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                },
+              }
+            );
+
+            if (taskResponse.ok) {
+              const taskData = await taskResponse.json();
+              return taskData.transactions || [];
+            } else {
+              console.error(`Failed to fetch transactions for task ${taskId}`);
+              return [];
+            }
+          })
+        );
+
+        // Flatten the transactions and calculate total expenditure
+        const flattenedTransactions = completedTransactions.flat();
+        const totalExpenditure = flattenedTransactions.reduce((sum, transaction) => {
+          return sum + (transaction.total || 0);
+        }, 0);
+
+        // Step 3: Set the area details with expenditure and tasks count
+        setAreaDetails({
+          name: area.name,
+          expenditure: totalExpenditure,
+          tasksCount: area.tasks.length,
+        });
       } catch (error) {
-        console.error("Error fetching project details:", error);
+        console.error("Error fetching area details:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchDetails();
-  }, []); // Empty dependency array ensures this runs only once on component mount
+  }, []);
 
   if (loading) {
     return <div>Loading...</div>;

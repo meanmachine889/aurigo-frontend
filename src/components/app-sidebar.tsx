@@ -10,6 +10,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +27,7 @@ import { TeamSwitcher } from "./team-switcher";
 import { NavUser } from "./nav-user";
 import { NavMain } from "./nav-main";
 import { jwtDecode } from "jwt-decode";
+import { Button } from "./ui/button";
 
 export const decodeToken = () => {
   try {
@@ -50,6 +52,7 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const router = useRouter();
   const [userData, setUserData] = useState({ name: "", email: "" });
   const [teams, setTeams] = useState<{ name: string; logo: any; plan: string; id?: string }[]>([]);
   const [activeTeam, setActiveTeam] = useState<{ name: string; logo: any; plan: string; id?: string } | null>(null);
@@ -197,10 +200,10 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Button onClick={() => router.push(`${item.url}/${activeTeam!.id}`)} variant="ghost" className="w-fit">
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
