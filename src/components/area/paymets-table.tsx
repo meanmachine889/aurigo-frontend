@@ -1,96 +1,98 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-'use client'
+"use client";
 
-import * as React from "react"
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Button } from "../ui/button"
+import { useEffect, useState } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "../ui/button";
 
 interface Payment {
-  id: string
-  approver: string
-  upi: string
-  amount: number
-  date: string
-  description?: string
+  id: string;
+  approver: string;
+  upi: string;
+  amount: number;
+  date: string;
+  description?: string;
 }
 
-const payments: Payment[] = [
-  {
-    id: "1",
-    approver: "Yash",
-    upi: "ken99@yahoo.com",
-    amount: 316.00,
-    date: "2023-06-05",
-    description: "Tiles"
-  },
-  {
-    id: "2",
-    approver: "Sai Charan",
-    upi: "abe45@gmail.com",
-    amount: 242.00,
-    date: "2023-06-06",
-    description: "Paint"
-  },
-  {
-    id: "3",
-    approver: "Kshitij",
-    upi: "monserrat44@gmail.com",
-    amount: 837.00,
-    date: "2023-06-07",
-    description: "Furniture"
-  },
-  {
-    id: "4",
-    approver: "Naman",
-    upi: "carmella@hotmail.com",
-    amount: 721.00,
-    date: "2023-06-08",
-    description: "Curtains"
-  },
-]
-
 export default function PaymentsTable() {
-  const [selectedRows, setSelectedRows] = React.useState<string[]>([])
-  const [filterValue, setFilterValue] = React.useState("")
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [filterValue, setFilterValue] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 5; // Items per page
+  const pathname = window.location.pathname; // Use `window.location` to access the full path
+    const segments = pathname.split("/"); // Split the path into segments
+    const lastSegment = segments[segments.length - 1]; // Get the last part of the path
+    const [projectId, areaId] = lastSegment.split("-"); // Extract projectId and areaId
+  const fetchPayments = async (currentPage: number) => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `http://localhost:5000/api/transaction/${projectId}/${areaId}/completed-transactions?page=${currentPage}&limit=${limit}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Fetched payments:", data);
+        setPayments(
+          data.transactions.map((task: any) => ({
+            id: task._id,
+            approver: task.payerid || "Unknown",
+            upi: task.upiid || "N/A",
+            amount: task.total || 0,
+            date: task.updatedAt || "N/A",
+            description: task.description || "",
+          }))
+        );
+        setTotalPages(Math.ceil(data.pagination.totalTasks / limit));
+      } else {
+        console.error("Failed to fetch payments");
+      }
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filteredPayments = payments.filter(payment =>
+  useEffect(() => {
+    fetchPayments(page);
+  }, [page]);
+
+  const filteredPayments = payments.filter((payment) =>
     payment.upi.toLowerCase().includes(filterValue.toLowerCase())
-  )
+  );
 
-  const isAllSelected = selectedRows.length === filteredPayments.length
+  const isAllSelected = selectedRows.length === filteredPayments.length;
 
   const toggleAll = () => {
     if (isAllSelected) {
-      setSelectedRows([])
+      setSelectedRows([]);
     } else {
-      setSelectedRows(filteredPayments.map(payment => payment.id))
+      setSelectedRows(filteredPayments.map((payment) => payment.id));
     }
-  }
+  };
 
   const toggleRow = (id: string) => {
     if (selectedRows.includes(id)) {
-      setSelectedRows(selectedRows.filter(rowId => rowId !== id))
+      setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
     } else {
-      setSelectedRows([...selectedRows, id])
+      setSelectedRows([...selectedRows, id]);
     }
-  }
+  };
 
   return (
     <div className="w-full space-y-4 bg-background p-3 border-2 rounded-xl">
       <div className="space-y-1">
         <h1 className="text-2xl font-normal tracking-tight">Payments</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage your payments.
-        </p>
+        <p className="text-sm text-muted-foreground">Manage your payments.</p>
       </div>
       <div className="flex items-center justify-between">
         <Input
@@ -100,49 +102,54 @@ export default function PaymentsTable() {
           className="max-w-sm"
         />
       </div>
-      <div className="rounded-md border bg-[#1d1d1d]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Approver</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>
-                Receiver UPI Id
-              </TableHead>
-              <TableHead className="">Amount</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredPayments.map((payment) => (
-              <TableRow key={payment.id}>
-                <TableCell>
-                  <span >
-                    {payment.approver}
-                  </span>
-                </TableCell>
-                <TableCell>{payment.description}</TableCell>
-                <TableCell>{payment.upi}</TableCell>
-                <TableCell className="">
-                ₹{payment.amount.toFixed(2)}
-                </TableCell>
-                <TableCell>{payment.date}</TableCell>
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Approver</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Receiver UPI Id</TableHead>
+                <TableHead className="">Amount</TableHead>
+                <TableHead>Date</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {filteredPayments.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell>{payment.approver}</TableCell>
+                  <TableCell>{payment.description}</TableCell>
+                  <TableCell>{payment.upi}</TableCell>
+                  <TableCell>₹{payment.amount.toFixed(2)}</TableCell>
+                  <TableCell>{payment.date}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div className="space-x-2">
-          <Button  className="bg-[#1d1d1d] text-gray-300" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === 1}
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          >
             Previous
           </Button>
-          <Button  className="bg-[#1d1d1d] text-gray-300" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === totalPages}
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+          >
             Next
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }

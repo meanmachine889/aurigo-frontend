@@ -18,29 +18,115 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [email, setEmail] = useState("");
+  const [password, setpassword] = useState("");
 
   async function onLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
+  
+    try {
+      // Prepare login payload
+      const payload = {
+        email: email, // Replace with your email state
+        password: password, // Replace with your password state
+      };
+  
+      // Send login request to the backend
+      const response = await fetch("http://localhost:5000/api/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        setShowOTPModal(true); // Show OTP modal on successful login
+      } else {
+        alert(data.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred during login. Please try again.");
+    } finally {
       setIsLoading(false);
-      setShowOTPModal(true);
-    }, 1500);
+    }
   }
+  
 
   const handleOTPComplete = async (otp: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
+  
+    try {
+      // Prepare OTP verification payload
+      const payload = {
+        email: email, // Replace with your email state
+        otp: otp, // OTP entered by the user
+      };
+  
+      // Send OTP verification request to the backend
+      const response = await fetch("http://localhost:5000/api/user/verifyotp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // Store the token in localStorage
+        localStorage.setItem("authToken", data.token);
+        setShowOTPModal(false); // Close OTP modal
+        alert("Successfully verified!");
+  
+        // Optionally redirect to a dashboard or home page
+        window.location.href = "/dashboard";
+      } else {
+        alert(data.message || "OTP verification failed");
+      }
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      alert("An error occurred during OTP verification. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    // Simulate OTP verification
-    setTimeout(() => {
-      setIsLoading(false)
-      setShowOTPModal(false)
-      // Here you would typically redirect to the dashboard or home page
-      alert("Successfully verified!")
-    }, 1500)
-  }
+  const resendotp = async () => {
+    setIsLoading(true);
+  
+    try {
+      // Prepare payload for resending OTP
+      const payload = { email };
+  
+      // Send request to the backend to resend OTP
+      const response = await fetch("http://localhost:5000/api/user/sendotp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert("A new OTP has been sent to your email.");
+      } else {
+        alert(data.message || "Failed to resend OTP.");
+      }
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      alert("An error occurred while resending OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
   return (
     <>
@@ -65,7 +151,7 @@ export default function Login() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required />
+            <Input id="password" type="password" required onChange={(e)=>{setpassword(e.target.value)}}/>
           </div>
         </CardContent>
         <CardFooter>
@@ -87,7 +173,7 @@ export default function Login() {
               variant="link"
               className="text-sm"
               onClick={() => {
-                // Here you would typically trigger resending the OTP
+                resendotp();
                 alert("New code sent!")
               }}
             >

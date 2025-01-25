@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import * as React from "react";
-
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -14,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
 
-interface Payment {
+interface Task {
   id: string;
   name: string;
   description: string;
@@ -23,42 +21,61 @@ interface Payment {
   endDate?: string;
 }
 
-const payments: Payment[] = [
-  {
-    id: "1",
-    name: "Tiles",
-    description: "Laying tiles in the living room",
-    status: "Completed",
-    startDate: "2023-06-01",
-    endDate: "2023-06-05",
-  },
-  {
-    id: "2",
-    name: "Paint",
-    description: "Painting the walls",
-    status: "In Progress",
-    startDate: "2023-06-02",
-    endDate: "",
-  },
-  {
-    id: "3",
-    name: "Furniture",
-    description: "Assembling furniture",
-    status: "In Progress",
-    startDate: "2023-06-03",
-    endDate: "",
-  },
-  {
-    id: "4",
-    name: "Curtains",
-    description: "Hanging curtains",
-    status: "Completed",
-    startDate: "2023-06-04",
-    endDate: "2023-06-08",
-  },
-];
-
 export default function TasksTable() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalTasks, setTotalTasks] = useState(0);
+  const [filterValue, setFilterValue] = useState("");
+
+  const fetchTasks = async (page: number) => {
+    const pathname = window.location.pathname;
+    const segments = pathname.split("/");
+    const lastSegment = segments[segments.length - 1];
+    const [projectId, areaId] = lastSegment.split("-");
+
+    if (!projectId || !areaId) {
+      console.error("Invalid URL: Missing projectId or areaId");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/task/${projectId}/areas/${areaId}/tasks?page=${page}&limit=5`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setTasks(data.tasks);
+        setTotalTasks(data.pagination.totalTasks);
+      } else {
+        console.error("Failed to fetch tasks");
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks(currentPage);
+  }, [currentPage]);
+
+  const filteredTasks = tasks.filter((task) =>
+    task.name.toLowerCase().includes(filterValue.toLowerCase())
+  );
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="w-full space-y-4 bg-background p-3 border-2 rounded-xl">
       <div className="space-y-1">
@@ -67,7 +84,15 @@ export default function TasksTable() {
           Manage all the tasks in this area.
         </p>
       </div>
-      <div className="rounded-md border bg-[#1d1d1d]">
+      <div className="flex items-center justify-start gap-5">
+        <Input
+          placeholder="Filter tasks by name..."
+          value={filterValue}
+          onChange={(e) => setFilterValue(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -76,21 +101,16 @@ export default function TasksTable() {
               <TableHead>Start Date</TableHead>
               <TableHead>End Date</TableHead>
               <TableHead className="">Status</TableHead>
-              <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {payments.map((payment) => (
-              <TableRow key={payment.id}>
-                <TableCell>
-                  <span>{payment.name}</span>
-                </TableCell>
-                <TableCell>{payment.description}</TableCell>
-                <TableCell>{payment.startDate}</TableCell>
-                <TableCell className="">
-                  {payment.endDate ? payment.endDate : "-"}
-                </TableCell>
-                <TableCell>{payment.status}</TableCell>
+            {filteredTasks.map((task) => (
+              <TableRow key={task.id}>
+                <TableCell>{task.name}</TableCell>
+                <TableCell>{task.description}</TableCell>
+                <TableCell>{task.startDate}</TableCell>
+                <TableCell>{task.endDate || "-"}</TableCell>
+                <TableCell>{task.status}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -98,13 +118,30 @@ export default function TasksTable() {
       </div>
       <div className="flex items-center justify-between">
         <div className="space-x-2">
-          <Button className="bg-[#1d1d1d] text-gray-300" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
             Previous
           </Button>
-          <Button className="bg-[#1d1d1d] text-gray-300" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setCurrentPage((prev) =>
+                prev * 5 < totalTasks ? prev + 1 : prev
+              )
+            }
+            disabled={currentPage * 5 >= totalTasks}
+          >
             Next
           </Button>
         </div>
+        <p className="text-sm text-muted-foreground">
+          Showing {tasks.length} of {totalTasks} tasks.
+        </p>
       </div>
     </div>
   );

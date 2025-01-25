@@ -2,7 +2,6 @@
 "use client";
 
 import * as React from "react";
-
 import {
   Table,
   TableBody,
@@ -13,81 +12,89 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import PaymentButton from "../ui/paymentbutton";
 
 interface Payment {
-  id: string;
-  upi: string;
+  upiid: string;
+  _id: string;
   amount: number;
   description: string;
   quantity: number;
 }
 
-const payments: Payment[] = [
-  {
-    id: "1",
-    upi: "ken99@yahoo.com",
-    amount: 316.0,
-    description: "Light Bulps",
-    quantity: 2,
-  },
-  {
-    id: "2",
-    upi: "abe45@gmail.com",
-    amount: 242.0,
-    description: "Taps",
-    quantity: 2,
-  },
-  {
-    id: "3",
-    upi: "monserrat44@gmail.com",
-    amount: 837.0,
-    description: "Shower heads",
-    quantity: 1,
-  },
-  {
-    id: "4",
-    upi: "carmella@hotmail.com",
-    amount: 721.0,
-    description: "bricks",
-    quantity: 100,
-  },
-];
-
 export type TaskPaymentsProps = {
-  id: string;
+  id: string; // The task ID
 };
 
 export default function TaskPayments({ id }: TaskPaymentsProps) {
-  const [selectedRows, setSelectedRows] = React.useState<string[]>([]);
+  const [transactions, setTransactions] = React.useState<Payment[]>([]);
   const [filterValue, setFilterValue] = React.useState("");
+  const [loading, setLoading] = React.useState(true);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [totalTransactions, setTotalTransactions] = React.useState(0);
+  const pageLimit = 5; // Transactions per page
 
-  const filteredPayments = payments.filter((payment) =>
-    payment.upi.toLowerCase().includes(filterValue.toLowerCase())
+  React.useEffect(() => {
+    const fetchTransactions = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/transaction/${id}?page=${currentPage}&limit=${pageLimit}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Fetched transactions:", data);
+          setTransactions(data.transactions);
+          setTotalTransactions(data.pagination.totalTransactions);
+        } else {
+          console.error("Failed to fetch transactions");
+        }
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [id, currentPage]);
+
+  const filteredTransactions = transactions.filter((transaction) =>
+    transaction.upiid?.toLowerCase().includes(filterValue.toLowerCase())
   );
 
-  const isAllSelected = selectedRows.length === filteredPayments.length;
-
-  const toggleAll = () => {
-    if (isAllSelected) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows(filteredPayments.map((payment) => payment.id));
+  const handleNextPage = () => {
+    if (currentPage * pageLimit < totalTransactions) {
+      setCurrentPage((prev) => prev + 1);
     }
   };
 
-  const toggleRow = (id: string) => {
-    if (selectedRows.includes(id)) {
-      setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
-    } else {
-      setSelectedRows([...selectedRows, id]);
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
     }
   };
+
+  if (loading) {
+    return <div>Loading transactions...</div>;
+  }
+
+  if (transactions.length === 0) {
+    return <div>No pending transactions found</div>;
+  }
 
   return (
     <div className="w-full space-y-4 bg-background ">
       <div className="flex items-center justify-start gap-5">
         <Input
-          placeholder="Filter upi id"
+          placeholder="Filter UPI ID"
           value={filterValue}
           onChange={(e) => setFilterValue(e.target.value)}
           className="max-w-sm"
@@ -99,24 +106,25 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
             <TableRow>
               <TableHead>Description</TableHead>
               <TableHead>Quantity</TableHead>
+              <TableHead>Amount</TableHead>
               <TableHead>Receiver&apos;s UPI Id</TableHead>
-              <TableHead className="">Amount</TableHead>
+              <TableHead className="">Total</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredPayments.map((payment) => (
-              <TableRow key={payment.id}>
-                <TableCell>{payment.description}</TableCell>
-                <TableCell>{payment.quantity}</TableCell>
-                <TableCell>{payment.upi}</TableCell>
+            {filteredTransactions.map((transaction) => (
+              console.log(transaction),
+              <TableRow key={transaction._id}>
+                <TableCell>{transaction.description}</TableCell>
+                <TableCell>{transaction.quantity}</TableCell>
+                <TableCell>{transaction.amount}</TableCell>
+                <TableCell>{transaction.upiid}</TableCell>
                 <TableCell className="">
-                  ${(payment.amount * payment.quantity).toFixed(2)}
+                  ₹{(transaction.amount * transaction.quantity).toFixed(2)}
                 </TableCell>
                 <TableCell>
-                  <Button variant={"outline"} className="bg-[#1d1d1d] border-2 text-green-700">
-                    Approve
-                  </Button>
+                  <PaymentButton amount={transaction.amount * transaction.quantity} transactionId={transaction._id}/>
                 </TableCell>
               </TableRow>
             ))}
@@ -124,11 +132,22 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
         </Table>
       </div>
       <div className="flex items-center justify-between">
+        
         <div className="space-x-2">
-          <Button className="bg-[#1d1d1d] text-gray-300" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+          >
             Previous
           </Button>
-          <Button className="bg-[#1d1d1d] text-gray-300" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextPage}
+            disabled={currentPage * pageLimit >= totalTransactions}
+          >
             Next
           </Button>
         </div>

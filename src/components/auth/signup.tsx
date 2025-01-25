@@ -13,31 +13,127 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [showOTPModal, setShowOTPModal] = useState(false)
   const [email, setEmail] = useState("")
+  const [name, setName] = useState("")
+  const [phone, setPhone] = useState("")
   const [role, setRole] = useState("")
+  const [password, setPassword] = useState("")
+  
 
   async function onSignup(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setIsLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      setShowOTPModal(true)
-    }, 1500)
+    event.preventDefault();
+    setIsLoading(true);
+  
+    try {
+      // Prepare signup payload
+      
+      const payload = {
+        email,
+        name,
+        phone,
+        role,
+        password
+      };
+  
+      // Send signup request to the backend
+      const response = await fetch("http://localhost:5000/api/user/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        setShowOTPModal(true); // Show OTP modal on successful signup
+      } else {
+        alert(data.message || "Signup failed");
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert("An error occurred during signup. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   }
+  
+
 
   const handleOTPComplete = async (otp: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
+  
+    try {
+      // Prepare OTP verification payload
+      const payload = {
+        email,
+        otp,
+      };
+  
+      // Send OTP verification request to the backend
+      const response = await fetch("http://localhost:5000/api/user/verifyotp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // Store the token in localStorage
+        localStorage.setItem("authToken", data.token);
+        setShowOTPModal(false); // Close OTP modal
+        alert("Successfully verified!");
+  
+        // Optionally redirect to a dashboard or home page
+        window.location.href = "/dashboard";
+      } else {
+        alert(data.message || "OTP verification failed");
+      }
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      alert("An error occurred during OTP verification. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    // Simulate OTP verification
-    setTimeout(() => {
-      setIsLoading(false)
-      setShowOTPModal(false)
-      // Here you would typically redirect to the dashboard or home page
-      alert("Successfully verified!")
-    }, 1500)
-  }
+  const resendotp = async () => {
+    setIsLoading(true);
+  
+    try {
+      // Prepare payload for resending OTP
+      const payload = { email };
+  
+      // Send request to the backend to resend OTP
+      const response = await fetch("http://localhost:5000/api/user/sendotp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert("A new OTP has been sent to your email.");
+      } else {
+        alert(data.message || "Failed to resend OTP.");
+      }
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      alert("An error occurred while resending OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
+
+  
   return (
     <>
       <Card>
@@ -49,11 +145,11 @@ export default function Signup() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" type="text" placeholder="John Doe" required />
+              <Input id="name" type="text" placeholder="John Doe" required onChange={(e)=>{setName(e.target.value)}} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="mobile">Mobile</Label>
-              <Input id="mobile" type="tel" placeholder="+1234567890" required />
+              <Input id="mobile" type="tel" placeholder="+1234567890" required onChange={(e)=>{setPhone(e.target.value)}}/>
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -72,14 +168,14 @@ export default function Signup() {
                   <SelectValue placeholder="Select your role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="customer">Customer</SelectItem>
+                  <SelectItem value="constructor">Manager</SelectItem>
+                  <SelectItem value="user">Customer</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required />
+              <Input id="password" type="password" required onChange={(e)=>{setPassword(e.target.value)}}/>
             </div>
           </CardContent>
           <CardFooter>
@@ -101,7 +197,7 @@ export default function Signup() {
               variant="link"
               className="text-sm"
               onClick={() => {
-                // Here you would typically trigger resending the OTP
+                resendotp();
                 alert("New code sent!")
               }}
             >
