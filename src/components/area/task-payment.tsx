@@ -96,7 +96,7 @@ export default function TaskPayments({ id }: TaskPaymentsProps) {
           onChange={(e) => setFilterValue(e.target.value)}
           className="max-w-sm"
         />
-        <TranForm />
+        <TranForm taskId={id}/>
       </div>
       {transactions.length ? <><div className="rounded-md border bg-[#1d1d1d]">
         <Table>

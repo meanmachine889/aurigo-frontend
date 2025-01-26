@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
 import { ChevronsUpDown } from "lucide-react";
 
 import {
@@ -27,6 +28,7 @@ export function TeamSwitcher({
   onTeamSelect?: (team: { name: string; logo: React.ElementType; plan: string; id?: string }) => void;
 }) {
   const { isMobile } = useSidebar();
+  const router = useRouter(); // Initialize the router
   const [activeTeam, setActiveTeam] = React.useState(() => {
     // Check for saved team in localStorage
     const savedTeamId = localStorage.getItem("activeTeamId");
@@ -41,6 +43,11 @@ export function TeamSwitcher({
     }
     if (onTeamSelect) {
       onTeamSelect(team);
+    }
+
+    // Navigate to the team's specific URL (e.g., `/team/:id`)
+    if (team.id) {
+      router.push(`/dashboard/${team.id}`);
     }
   };
 
@@ -82,7 +89,7 @@ export function TeamSwitcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">Teams</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Projects</DropdownMenuLabel>
             {teams.map((team, index) => (
               <DropdownMenuItem
                 key={team.name}

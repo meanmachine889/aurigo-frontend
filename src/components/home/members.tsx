@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Avatar from "boring-avatars";
 import {
   Card,
@@ -18,34 +19,71 @@ import {
 } from "../ui/table";
 import { TeamForm } from "../team-form";
 
-const team = [
-  {
-    name: "Sofia Davis",
-    email: "m@example.com",
-    role: "Manager",
-    mobile: "1234567890",
-  },
-  {
-    name: "Jackson Lee",
-    email: "p@example.com",
-    role: "Customer",
-    mobile: "1234567890",
-  },
-  {
-    name: "Isabella Nguyen",
-    email: "n@example.com",
-    role: "Customer",
-    mobile: "1234567890",
-  },
-  {
-    name: "Isabella Nguyen",
-    email: "n@example.com",
-    role: "Customer",
-    mobile: "1234567890",
-  },
-];
+interface TeamMember {
+  name: string;
+  email: string;
+  role: string;
+  mobile: string;
+}
 
 export function Members() {
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const pathname = window.location.pathname;
+        const segments = pathname.split("/");
+        const projectId = segments[segments.length - 1];
+
+        const response = await fetch(`http://localhost:5000/api/project/${projectId}/members`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setTeam([
+  {
+    name: data.constructor.name,
+    email: data.constructor.email,
+    role: data.constructor.role || "Constructor", // Default role for constructor
+    mobile: data.constructor.mobile || "N/A", // Default mobile if not specified
+  },
+  ...data.members.map((member: any) => ({
+    name: member.name,
+    email: member.email,
+    role: member.role || "Member", // Default role if not specified
+    mobile: member.mobile || "N/A", // Default mobile if not specified
+  })),
+]);
+
+        } else {
+          throw new Error("Failed to fetch team members");
+        }
+      } catch (error) {
+        console.error("Error fetching team members:", error);
+        setError("Failed to load team members. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeamMembers();
+  }, []);
+
+  if (loading) {
+    return <div>Loading team members...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+
   return (
     <Card className="min-w-[500px] w-[100%] col-span-2">
       <CardHeader>
@@ -75,9 +113,9 @@ export function Members() {
                     <Avatar name={member.email} variant="marble" size={30} />
                     {member.name}
                   </TableCell>
-                  <TableCell className="p-3 ">{member.email}</TableCell>
-                  <TableCell className="p-3 ">{member.mobile}</TableCell>
-                  <TableCell className="p-3 ">{member.role}</TableCell>
+                  <TableCell className="p-3">{member.email}</TableCell>
+                  <TableCell className="p-3">{member.mobile}</TableCell>
+                  <TableCell className="p-3">{member.role}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

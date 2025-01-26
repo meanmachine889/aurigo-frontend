@@ -19,7 +19,7 @@ export default function Page({ params }: pageprops) {
           <Members />
         </div>
         <RecentTasks />
-        <Workers />
+        <Workers projectId={params.id} />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Avatar from "boring-avatars";
 import {
   Card,
@@ -18,30 +19,100 @@ import {
 } from "../ui/table";
 import { WorkerForm } from "../worker-form";
 
-const team = [
-  {
-    name: "Sofia Davis",
-    role: "Plumber",
-    mobile: "1234567890",
-    upi: "sofia@upi",
-  },
-  {
-    name: "Jackson Lee",
-    email: "p@example.com",
-    role: "Carpenter",
-    mobile: "1234567890",
-    upi: "sofia@upi",
-  },
-  {
-    name: "Isabella Nguyen",
-    email: "n@example.com",
-    role: "Electrician",
-    mobile: "1234567890",
-    upi: "sofia@upi",
-  },
-];
+interface Worker {
+  _id: string;
+  name: string;
+  role: string;
+  mobile: string;
+  upiid: string;
+}
 
-export function Workers() {
+export function Workers({ projectId }: { projectId?: string }) {
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [workers1, setWorkers1] = useState<Worker[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchWorkers = async () => {
+    try {
+      setLoading(true);
+      const endpoint =`http://localhost:5000/api/workers/${projectId}`
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setWorkers(data.workers.map((worker: any) => ({ ...worker, mobile: worker.phone })));
+      } else {
+        setError("Failed to fetch workers");
+      }
+    } catch (error) {
+      setError("Error fetching workers");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchWorkers1 = async () => {
+    try {
+      setLoading(true);
+      const endpoint ="http://localhost:5000/api/workers";
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setWorkers1(data.workers.map((worker: any) => ({ ...worker, mobile: worker.phone })));
+      } else {
+        setError("Failed to fetch workers");
+      }
+    } catch (error) {
+      setError("Error fetching workers");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addWorker = async (newWorker: Worker) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/workers/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify({ ...newWorker, projectId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setWorkers((prevWorkers) => [...prevWorkers, data.worker]);
+      } else {
+        setError("Failed to add worker");
+      }
+    } catch (error) {
+      setError("Error adding worker");
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkers();
+    fetchWorkers1();
+  }, [projectId]);
+
+  if (loading) {
+    return <div>Loading workers...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <Card className="min-w-[500px] w-[100%] border-2">
       <CardHeader>
@@ -50,7 +121,7 @@ export function Workers() {
             <CardTitle className="font-normal text-lg">Workers</CardTitle>
             <CardDescription>Workers in your project.</CardDescription>
           </div>
-          <WorkerForm />
+          <WorkerForm onAddWorker={addWorker} existingWorkers={workers1} />
         </div>
       </CardHeader>
       <CardContent className="overflow-x-auto">
@@ -65,15 +136,15 @@ export function Workers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {team.map((member, index) => (
-                <TableRow key={index} className="">
+              {workers.map((worker, index) => (
+                <TableRow key={index} className="p-3">
                   <TableCell className="p-3 flex gap-3 items-center">
-                    <Avatar name={member.name} variant="marble" size={30} />
-                    {member.name}
+                    <Avatar name={worker.name} variant="marble" size={30} />
+                    {worker.name}
                   </TableCell>
-                  <TableCell className="p-3 ">{member.mobile}</TableCell>
-                  <TableCell className="p-3 ">{member.role}</TableCell>
-                  <TableCell className="p-3 ">{member.upi}</TableCell>
+                  <TableCell className="p-3">{worker.mobile}</TableCell>
+                  <TableCell className="p-3">{worker.role}</TableCell>
+                  <TableCell className="p-3">{worker.upiid}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
