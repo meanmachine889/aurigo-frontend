@@ -36,7 +36,11 @@ const updates: Update[] = [
   },
 ]
 
-const UpdatesComponent: React.FC = () => {
+interface UpdatesComponentProps {
+  taskId: string;
+}
+
+const UpdatesComponent: React.FC<UpdatesComponentProps> = ({ taskId }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
 
   const filteredUpdates = selectedDate

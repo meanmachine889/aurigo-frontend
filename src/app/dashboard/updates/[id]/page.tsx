@@ -70,7 +70,7 @@ export default function Page({ params }: PageProps) {
         </TabsList>
         {tasks.map((task) => (
           <TabsContent key={task._id} value={task._id}>
-            <UpdatesComponent />
+            <UpdatesComponent taskId={task._id} />
           </TabsContent>
         ))}
       </Tabs>
